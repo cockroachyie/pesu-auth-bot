@@ -33,7 +33,7 @@ async def setup():
 if __name__ == "__main__":
     config = yaml.safe_load(open("config.yml"))
     logging.info(f"Loaded config:\n{config}")
-    bot_prefix = config["bot"].get("prefix", "pes.")
+    bot_prefix = config["bot"].get("prefix", "pesauth.")
     intents = discord.Intents.default()
     intents.members = True
     intents.message_content = True
