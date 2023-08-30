@@ -16,7 +16,9 @@ class ModeratorCog(commands.Cog):
         self.client = client
         self.db = db
 
-    @app_commands.command(name="ping", description="Perform a ping test")
+    mod_commands = app_commands.Group(name="mod", description="Moderator commands", guild_only=True)
+
+    @mod_commands.command(name="ping", description="Perform a ping test")
     @app_commands.default_permissions(administrator=True)
     async def ping(self, interaction: discord.Interaction):
         """
@@ -30,7 +32,7 @@ class ModeratorCog(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name="setup", description="Setup a verification role for your server")
+    @mod_commands.command(name="setup", description="Setup a verification role for your server")
     @app_commands.default_permissions(administrator=True)
     @app_commands.describe(role="The role to be used for verification")
     async def setup(self, interaction: discord.Interaction, role: discord.Role):
@@ -42,6 +44,7 @@ class ModeratorCog(commands.Cog):
 
         existing_verification_role = self.db.get_verification_role_for_server(guild_id=interaction.guild_id)
         if existing_verification_role:
+            existing_verification_role = interaction.guild.get_role(existing_verification_role)
             embed = discord.Embed(
                 title="Verification Role Setup Failed",
                 description=f"Verification role already set to {existing_verification_role.mention}. "
@@ -49,6 +52,16 @@ class ModeratorCog(commands.Cog):
                 color=discord.Color.red(),
             )
         else:
+            role = interaction.guild.get_role(role.id)
+            if not role.is_assignable():
+                embed = discord.Embed(
+                    title="Verification Role Setup Failed",
+                    description=f"{role.mention} is set to not be assignable. Please change this and try again."
+                                f"\n\n*Tip: Ensure that the role is below my role in the role hierarchy*",
+                    color=discord.Color.red(),
+                )
+                await interaction.followup.send(embed=embed)
+                return
             self.db.add_verification_role(guild_id=interaction.guild_id, role_id=role.id)
             embed = discord.Embed(
                 title="Verification Role Setup Successful",
@@ -58,7 +71,7 @@ class ModeratorCog(commands.Cog):
             )
         await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="remove", description="Remove the verification role for your server")
+    @mod_commands.command(name="remove", description="Remove the verification role for your server")
     @app_commands.default_permissions(administrator=True)
     @app_commands.describe(deverify="Remove the verification role from existing members")
     @app_commands.choices(deverify=[
@@ -95,7 +108,7 @@ class ModeratorCog(commands.Cog):
             )
         await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="update", description="Update the verification role for your server")
+    @mod_commands.command(name="update", description="Update the verification role for your server")
     @app_commands.default_permissions(administrator=True)
     @app_commands.describe(role="The role to be used for verification")
     @app_commands.describe(reverify="Update the verification role for existing members. Note that this will remove "
@@ -113,6 +126,16 @@ class ModeratorCog(commands.Cog):
 
         existing_verification_role = self.db.get_verification_role_for_server(guild_id=interaction.guild_id)
         if existing_verification_role:
+            role = interaction.guild.get_role(role.id)
+            if not role.is_assignable():
+                embed = discord.Embed(
+                    title="Verification Role Update Failed",
+                    description=f"{role.mention} is set to not be assignable. Please change this and try again."
+                                f"\n\n*Tip: Ensure that the role is below my role in the role hierarchy*",
+                    color=discord.Color.red(),
+                )
+                await interaction.followup.send(embed=embed)
+                return
             existing_verification_role = interaction.guild.get_role(existing_verification_role)
             self.db.add_verification_role(guild_id=interaction.guild_id, role_id=role.id)
             embed = discord.Embed(
@@ -135,3 +158,9 @@ class ModeratorCog(commands.Cog):
                 color=discord.Color.red(),
             )
         await interaction.followup.send(embed=embed)
+
+async def setup(client: commands.Bot):
+    """
+    Adds the cog to the bot
+    """
+    await client.add_cog(ModeratorCog(client, client.db))

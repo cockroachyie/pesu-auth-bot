@@ -40,21 +40,34 @@ class AuthenticationCog(commands.Cog):
         Authenticates the user with their PESU Academy credentials
         """
         logging.info(f"Authenticating {interaction.user}")
-        await interaction.response.defer()
-        verification_role_id = self.db.get_verification_role_for_server(guild_id=interaction.guild_id)
+        await interaction.response.defer(ephemeral=True)
+        try:
+            verification_role_id = self.db.get_verification_role_for_server(guild_id=interaction.guild_id)
+        except AttributeError:
+            verification_role_id = None
         if verification_role_id is not None:
             verification_role = interaction.guild.get_role(verification_role_id)
             if verification_role in interaction.user.roles:
                 embed = discord.Embed(
                     title="Verification Failed",
                     description=f"You are already verified on this server",
-                    color=discord.Color.red(),
+                    color=discord.Color.orange(),
                 )
                 await interaction.followup.send(embed=embed)
             else:
                 authentication_result = self.check_pesu_academy_credentials(username=username, password=password)
                 if authentication_result["status"]:
-                    await interaction.user.add_roles(verification_role)
+                    try:
+                        await interaction.user.add_roles(verification_role)
+                    except discord.Forbidden:
+                        embed = discord.Embed(
+                            title="Verification Failed",
+                            description=f"{self.client.user.mention} does not have permission to assign the {verification_role.mention} role. "
+                                        f"Please contact an admin to give bot the required permissions",
+                            color=discord.Color.red(),
+                        )
+                        await interaction.followup.send(embed=embed)
+                        return
                     embed = discord.Embed(
                         title="Verification Successful",
                         description=f"You have successfully verified your account and have been assigned the "
@@ -63,7 +76,8 @@ class AuthenticationCog(commands.Cog):
                     )
                     for field in authentication_result["profile"]:
                         modified_field = field.replace("_", " ")
-                        modified_field = " ".join([word.capitalize() for word in modified_field.split()])
+                        modify = lambda x: x.capitalize() if len(x) > 3 else x.upper()
+                        modified_field = " ".join([modify(word) for word in modified_field.split()])
                         embed.add_field(name=modified_field, value=authentication_result["profile"][field], inline=True)
                     await interaction.followup.send(embed=embed, ephemeral=True)
                 else:
@@ -81,3 +95,10 @@ class AuthenticationCog(commands.Cog):
                 color=discord.Color.red(),
             )
             await interaction.followup.send(embed=embed)
+
+
+async def setup(client: commands.Bot):
+    """
+    Adds the cog to the bot
+    """
+    await client.add_cog(AuthenticationCog(client, client.db))
