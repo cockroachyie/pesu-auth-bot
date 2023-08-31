@@ -6,7 +6,7 @@ A simple bot to authenticate users in any server using their PESU credentials.
 
 ### Invite the bot to your server
 
-Use this [link](https://discord.com/api/oauth2/authorize?client_id=778825825959397888&permissions=0&scope=bot) to invite the bot to your server.
+Use this [link](https://discord.com/api/oauth2/authorize?client_id=1146109578241638593&permissions=1377007037446&scope=bot) to invite the bot to your server.
 
 ### Run/Deploy the bot yourself
 
