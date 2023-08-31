@@ -19,7 +19,7 @@ class ModeratorCog(commands.Cog):
     mod_commands = app_commands.Group(name="mod", description="Moderator commands", guild_only=True)
 
     @mod_commands.command(name="ping", description="Perform a ping test")
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     async def ping(self, interaction: discord.Interaction):
         """
         Performs a ping test
@@ -33,7 +33,7 @@ class ModeratorCog(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @mod_commands.command(name="setup", description="Setup a verification role for your server")
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(role="The role to be used for verification")
     async def setup(self, interaction: discord.Interaction, role: discord.Role):
         """
@@ -72,7 +72,7 @@ class ModeratorCog(commands.Cog):
         await interaction.followup.send(embed=embed)
 
     @mod_commands.command(name="remove", description="Remove the verification role for your server")
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(deverify="Remove the verification role from existing members")
     @app_commands.choices(deverify=[
         app_commands.Choice(name="Yes", value=1),
@@ -109,7 +109,7 @@ class ModeratorCog(commands.Cog):
         await interaction.followup.send(embed=embed)
 
     @mod_commands.command(name="update", description="Update the verification role for your server")
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(role="The role to be used for verification")
     @app_commands.describe(reverify="Update the verification role for existing members. Note that this will remove "
                                     "the existing verification role.")
