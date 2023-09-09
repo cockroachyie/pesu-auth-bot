@@ -4,9 +4,10 @@ A simple bot to authenticate users in any server using their PESU credentials.
 
 ## Usage
 
-### Invite the bot to your server
-
-Use this [link](https://discord.com/api/oauth2/authorize?client_id=1146109578241638593&permissions=1377007037446&scope=bot) to invite the bot to your server.
+1. Invite the bot to your server using this [link](https://discord.com/api/oauth2/authorize?client_id=1146109578241638593&permissions=1377007037446&scope=bot).
+2. Use the `/mod setup` command to assign an existing server role to verified users.
+3. Certain channel's access can be restricted to only the verified PESU users using the same role.
+4. The users can verify themselves using the `/auth` command anytime once the setup is done.
 
 ### Run/Deploy the bot yourself
 
