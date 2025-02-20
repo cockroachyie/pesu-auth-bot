@@ -1,0 +1,14 @@
+bot:
+    token: 'your-bot-token'
+    developer_user_ids:
+        - <discord_developer_id_1>
+        - <discord_developer_id_2>
+    developer_guild_ids:
+        - <discord_developer_guild_id_1>
+        - <discord_developer_guild_id_2>
+    developer_channel_ids:
+        - <discord_developer_channel_id_1>
+        - <discord_developer_channel_id_2>
+
+    prefix: 'bot-prefix'
+db: 'path/to/mongo_database/file.db' # if local host - 'mongodb://localhost:27017/'
